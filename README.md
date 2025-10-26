@@ -6,7 +6,7 @@ Android and iOS using a custom MethodChannel.
 This plugin serves as an example or foundation for adding platform-specific code in Flutter without
 relying on third-party packages.
 
-🚀 Features
+## Features
 
 Retrieve detailed Android and iOS device information.
 
