@@ -34,73 +34,54 @@ class DeviceInfoPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
-    private fun getDeviceInfo(): Map<String, Any> {
-        return mapOf(
-            "carrier" to getCarrier(),
-            "wifi" to isWifiConnected(),
-            "bluetooth_enabled" to isBluetoothEnabled(),
-            "radio" to isCellularConnected(),
-            "has_nfc" to hasNfc(),
-            "ussd_channel" to hasUssdChannel()
-        )
-    }
+    private fun getDeviceInfo(): Map<String, Any> = mapOf(
+        "carrier" to getCarrier(),
+        "wifi" to isWifiConnected(),
+        "bluetooth_enabled" to isBluetoothEnabled(),
+        "radio" to isCellularConnected(),
+        "has_nfc" to hasNfc(),
+        "ussd_channel" to hasUssdChannel()
+    )
 
-    private fun getCarrier(): String {
-        return try {
-            val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
-            telephonyManager?.networkOperatorName?.takeIf { it.isNotEmpty() } ?: "Unknown"
-        } catch (e: Exception) {
-            "Unknown"
-        }
+    private fun getCarrier(): String = try {
+        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+        tm?.networkOperatorName?.takeIf { it.isNotEmpty() } ?: "Unknown"
+    } catch (_: Exception) {
+        "Unknown"
     }
 
     private fun isWifiConnected(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            ?: return false
-
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val network = connectivityManager.activeNetwork ?: return false
-            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+            val network = cm.activeNetwork ?: return false
+            val caps = cm.getNetworkCapabilities(network) ?: return false
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
         } else {
             @Suppress("DEPRECATION")
-            connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
+            cm.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
         }
     }
 
     private fun isCellularConnected(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            ?: return false
-
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val network = connectivityManager.activeNetwork ?: return false
-            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+            val network = cm.activeNetwork ?: return false
+            val caps = cm.getNetworkCapabilities(network) ?: return false
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
         } else {
             @Suppress("DEPRECATION")
-            connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_MOBILE
+            cm.activeNetworkInfo?.type == ConnectivityManager.TYPE_MOBILE
         }
     }
 
-    private fun isBluetoothEnabled(): Boolean {
-        return try {
-            BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
-        } catch (e: Exception) {
-            false
-        }
-    }
+    private fun isBluetoothEnabled(): Boolean = BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
+    private fun hasNfc(): Boolean = context.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
 
-    private fun hasNfc(): Boolean {
-        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
-    }
-
-    private fun hasUssdChannel(): Boolean {
-        return try {
-            val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
-            telephonyManager != null && telephonyManager.phoneType != TelephonyManager.PHONE_TYPE_NONE
-        } catch (e: Exception) {
-            false
-        }
+    private fun hasUssdChannel(): Boolean = try {
+        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+        tm != null && tm.phoneType != TelephonyManager.PHONE_TYPE_NONE
+    } catch (_: Exception) {
+        false
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {

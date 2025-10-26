@@ -10,7 +10,7 @@ class MethodChannelDeviceInfo extends DeviceInfoPlatform {
   @override
   Future<DeviceInfoModel> getDeviceInfo() async {
     try {
-      final result = await methodChannel.invokeMethod<Map>('getDeviceInfo');
+      final result = await methodChannel.invokeMapMethod<String, dynamic>('getDeviceInfo');
       final map = Map<String, dynamic>.from(result ?? {});
       return DeviceInfoModel.fromMap(map);
     } on PlatformException catch (e) {

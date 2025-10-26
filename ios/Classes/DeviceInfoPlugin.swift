@@ -9,18 +9,16 @@ public class DeviceInfoPlugin: NSObject, FlutterPlugin {
     private var isBluetoothOn = false
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(
-            name: "com.deviceinfo/channel",
-            binaryMessenger: registrar.messenger()
-        )
+        let channel = FlutterMethodChannel(name: "com.deviceinfo/channel", binaryMessenger: registrar.messenger())
         let instance = DeviceInfoPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if call.method == "getDeviceInfo" {
+        switch call.method {
+        case "getDeviceInfo":
             result(getDeviceInfo())
-        } else {
+        default:
             result(FlutterMethodNotImplemented)
         }
     }
@@ -37,65 +35,37 @@ public class DeviceInfoPlugin: NSObject, FlutterPlugin {
     }
 
     private func getCarrier() -> String {
-        let networkInfo = CTTelephonyNetworkInfo()
+        let info = CTTelephonyNetworkInfo()
         if #available(iOS 12.0, *) {
-            if let carrier = networkInfo.serviceSubscriberCellularProviders?.values.first {
-                return carrier.carrierName ?? "Unknown"
-            }
-        } else {
-            if let carrier = networkInfo.subscriberCellularProvider {
-                return carrier.carrierName ?? "Unknown"
-            }
+            return info.serviceSubscriberCellularProviders?.values.first?.carrierName ?? "Unknown"
         }
-        return "Unknown"
+        return info.subscriberCellularProvider?.carrierName ?? "Unknown"
     }
 
     private func isWifiConnected() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
         zeroAddress.sin_family = sa_family_t(AF_INET)
-
-        guard let defaultRouteReachability = withUnsafePointer(to: &zeroAddress, {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                SCNetworkReachabilityCreateWithAddress(nil, $0)
-            }
-        }) else {
-            return false
-        }
+        guard let reachability = withUnsafePointer(to: &zeroAddress, {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { SCNetworkReachabilityCreateWithAddress(nil, $0) }
+        }) else { return false }
 
         var flags: SCNetworkReachabilityFlags = []
-        if !SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags) {
-            return false
-        }
-
-        let isReachable = flags.contains(.reachable)
-        let isWWAN = flags.contains(.isWWAN)
-
-        return isReachable && !isWWAN
+        guard SCNetworkReachabilityGetFlags(reachability, &flags) else { return false }
+        return flags.contains(.reachable) && !flags.contains(.isWWAN)
     }
 
     private func isCellularConnected() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
         zeroAddress.sin_family = sa_family_t(AF_INET)
-
-        guard let defaultRouteReachability = withUnsafePointer(to: &zeroAddress, {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                SCNetworkReachabilityCreateWithAddress(nil, $0)
-            }
-        }) else {
-            return false
-        }
+        guard let reachability = withUnsafePointer(to: &zeroAddress, {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { SCNetworkReachabilityCreateWithAddress(nil, $0) }
+        }) else { return false }
 
         var flags: SCNetworkReachabilityFlags = []
-        if !SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags) {
-            return false
-        }
-
-        let isReachable = flags.contains(.reachable)
-        let isWWAN = flags.contains(.isWWAN)
-
-        return isReachable && isWWAN
+        guard SCNetworkReachabilityGetFlags(reachability, &flags) else { return false }
+        return flags.contains(.reachable) && flags.contains(.isWWAN)
     }
 
     private func checkBluetooth() -> Bool {
@@ -106,19 +76,16 @@ public class DeviceInfoPlugin: NSObject, FlutterPlugin {
     }
 
     private func hasNFC() -> Bool {
-        if #available(iOS 11.0, *) {
-            return true
-        }
+        if #available(iOS 11.0, *) { return true }
         return false
     }
 
     private func hasUssdChannel() -> Bool {
-        let networkInfo = CTTelephonyNetworkInfo()
+        let info = CTTelephonyNetworkInfo()
         if #available(iOS 12.0, *) {
-            return networkInfo.serviceSubscriberCellularProviders?.isEmpty == false
-        } else {
-            return networkInfo.subscriberCellularProvider != nil
+            return !(info.serviceSubscriberCellularProviders?.isEmpty ?? true)
         }
+        return info.subscriberCellularProvider != nil
     }
 }
 
