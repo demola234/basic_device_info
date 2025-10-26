@@ -1,6 +1,6 @@
 # Device Info Plugin
 
-A Flutter plugin that provides native device information (brand, model, OS version, etc.) from
+A Flutter plugin that provides native device information (carrier, wifi, bluetoothEnabled, etc.) from
 Android and iOS using a custom MethodChannel.
 
 This plugin serves as an example or foundation for adding platform-specific code in Flutter without
@@ -16,7 +16,7 @@ Built using Flutter Platform Channels.
 
 ## Installation
 
-Add this plugin to your Flutter project (assuming it’s in a local folder):
+Add this plugin to your Flutter project:
 
 ```yaml
 dependencies:
