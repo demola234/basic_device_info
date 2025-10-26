@@ -14,7 +14,7 @@ Works via a single Dart API.
 
 Built using Flutter Platform Channels.
 
-📦 Installation
+## Installation
 
 Add this plugin to your Flutter project (assuming it’s in a local folder):
 
@@ -32,7 +32,7 @@ Then run:
 flutter pub get
 ```
 
-🔧 Usage
+## Usage
 Import the plugin and use it to get device information:
 
 ```dart
