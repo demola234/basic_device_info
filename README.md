@@ -48,8 +48,11 @@ Expected Output:
 
 ```json
 {
-  "brand": "Google",
-  "model": "Pixel 6",
-  "systemVersion": "Android 14"
+  'carrier': 'T-Mobile',
+  'wifi': false,
+  'bluetoothEnabled': true,
+  'radio': true,
+  'hasNfc': true,
+  'ussdChannel': false,
 }
 ```
