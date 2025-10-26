@@ -1,15 +1,55 @@
-# device_info
+# Device Info Plugin
 
-A new Flutter plugin project.
+A Flutter plugin that provides native device information (brand, model, OS version, etc.) from
+Android and iOS using a custom MethodChannel.
 
-## Getting Started
+This plugin serves as an example or foundation for adding platform-specific code in Flutter without
+relying on third-party packages.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+🚀 Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Retrieve detailed Android and iOS device information.
 
+Works via a single Dart API.
+
+Built using Flutter Platform Channels.
+
+📦 Installation
+
+Add this plugin to your Flutter project (assuming it’s in a local folder):
+
+```yaml
+dependencies:
+device_info:
+  git:
+    url: "https://github.com/demola234/basic_device_info.git"
+    ref: "main"
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+🔧 Usage
+Import the plugin and use it to get device information:
+
+```dart
+import 'package:device_info/device_info.dart';
+
+void main() async {
+  final deviceInfo = await DeviceInfo().getDeviceInfo();
+  print('Device info: $deviceInfo');
+}
+```
+
+Expected Output:
+
+```json
+{
+  "brand": "Google",
+  "model": "Pixel 6",
+  "systemVersion": "Android 14"
+}
+```
